@@ -1,0 +1,22 @@
+Simple Objective-C bindings
+==========
+This is a simple bindings-like mechanism somewhat similar to Cocoa Bindings. 
+
+It was originally intended to make the lack of Cocoa Bindings on iOS less painful, but has somewhat different semantics and expanded functionality when compared to its ancestor.
+
+What is in here
+---------------
+A category for `NSObject` to allow for seamless usage of bindings for all its subclasses.
+
+Requirements
+------------
+- A compiler and SDK that allow the usage of Objective-C blocks. If you build your app for iOS 4 and above, this is the case.
+- Internally, key-value coding and key-value observing (KVC/KVO) is used
+
+Status
+------
+This code is still very much in beta. In particular, it is known to sometimes leak observers.
+
+License
+-------
+You can do whatever you want with this code, but there is no guarantee of any kind for it. 
