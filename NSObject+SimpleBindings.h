@@ -12,9 +12,7 @@ typedef id(^SimpleBindingTransformer)(id value);
 
 /**
  A simple bindings-like mechanism. Inspired by Cocoa bindings.
- No value transformers are supported. 
- 
- For more complex needs, use Signals.
+ No two-way value transformers are supported. 
  */
 @interface NSObject (SimpleBindings)
 

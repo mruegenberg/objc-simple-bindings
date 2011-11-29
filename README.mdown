@@ -15,7 +15,14 @@ Requirements
 
 Status
 ------
-This code is still very much in beta. In particular, it is known to sometimes leak observers.
+This code is still very much in beta. 
+
+Note
+----
+It is important to correctly release bindings. Otherwise, observers might be leaked and bad things may happen.
+In general, if you call a `bind` method on an object, A, the binding is automatically removed as soon as A is deallocated. If you bound a property on A to a property on B, try to ensure that B is not deallocated before A.
+
+In particular, unforeseen situations may arise when using blocks, which implicitly retain variables.
 
 License
 -------

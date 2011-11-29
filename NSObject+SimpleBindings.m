@@ -8,7 +8,7 @@
 
 #import "NSObject+SimpleBindings.h"
 #import <objc/runtime.h>
-
+#import "NSArray+FPAdditions.h"
 
 @interface ObjectBinding : NSObject {
 }
@@ -28,16 +28,37 @@
 
 @property BOOL bindingActive;
 
+@property BOOL isKeyPath1;
+@property BOOL isKeyPath2;
+
 @end
 
 @implementation ObjectBinding
 @synthesize obj1, keyPath1, obj2, keyPath2, bindingActive;
+@synthesize isKeyPath1, isKeyPath2;
 
 - (id)initWithKeyPath:(NSString *)keyPath1_ ofObj:(NSObject *)obj1_ keyPath:(NSString *)keyPath2_ ofObj:(NSObject *)obj2_ {
     if((self = [super init])) {
         self.obj1 = obj1_; self.keyPath1 = keyPath1_;
         self.obj2 = obj2_; self.keyPath2 = keyPath2_;
-		[self.obj1 setValue:[self.obj2 valueForKeyPath:self.keyPath2] forKeyPath:self.keyPath1];
+        
+        self.isKeyPath1 = [self.obj1 valueForKeyPath:fromEmptyStr([[[self.keyPath1 componentsSeparatedByString:@"."] initialArray] componentsJoinedByString:@"."], self.keyPath1)] != nil;
+        self.isKeyPath2 = [self.obj2 valueForKeyPath:fromEmptyStr([[[self.keyPath2 componentsSeparatedByString:@"."] initialArray] componentsJoinedByString:@"."], self.keyPath2)] != nil;
+        
+        // only set key paths if that makes sense.
+        // key paths only make sense if an object for the key path without the last component exists
+        if(self.isKeyPath1) {
+            if(self.isKeyPath2)
+                [self.obj1 setValue:[self.obj2 valueForKeyPath:self.keyPath2] forKeyPath:self.keyPath1];
+            else
+                [self.obj1 setValue:[self.obj2 valueForKey:self.keyPath2] forKeyPath:self.keyPath1];
+        }
+        else {
+            if(self.isKeyPath2)
+                [self.obj1 setValue:[self.obj2 valueForKeyPath:self.keyPath2] forKey:self.keyPath1];
+            else
+                [self.obj1 setValue:[self.obj2 valueForKey:self.keyPath2] forKey:self.keyPath1];
+        }
         [self.obj1 addObserver:self forKeyPath:self.keyPath1 options:0 context:NULL];
         [self.obj2 addObserver:self forKeyPath:self.keyPath2 options:0 context:NULL];
 		self.bindingActive = YES;
@@ -52,15 +73,37 @@
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
-    NSObject *otherObject = nil; NSString *otherKeyPath = nil;
-    if(object == self.obj1 && [keyPath isEqualToString:self.keyPath1]) { otherObject = self.obj2; otherKeyPath = self.keyPath2; }
-    else if(object == self.obj2 && [keyPath isEqualToString:self.keyPath2]) { otherObject = self.obj1; otherKeyPath = self.keyPath1; }
+    NSObject *otherObject = nil; NSString *otherKeyPath = nil; BOOL isKeyPath = YES; BOOL otherIsKeyPath = YES;
+    if(object == self.obj1 && [keyPath isEqualToString:self.keyPath1]) { otherObject = self.obj2; otherKeyPath = self.keyPath2; isKeyPath = self.isKeyPath1; otherIsKeyPath = self.isKeyPath2; }
+    else if(object == self.obj2 && [keyPath isEqualToString:self.keyPath2]) { otherObject = self.obj1; otherKeyPath = self.keyPath1; otherKeyPath = self.keyPath2; isKeyPath = self.isKeyPath2; otherIsKeyPath = self.isKeyPath1; }
     else return;
     
-    id val = [object valueForKeyPath:keyPath];
-
-	if((! [[object valueForKeyPath:keyPath] isEqual:[otherObject valueForKeyPath:otherKeyPath]]) && ! (val == nil && [otherObject valueForKeyPath:otherKeyPath] == nil)) {
-        [otherObject setValue:val forKeyPath:otherKeyPath];
+    id val = isKeyPath ? [object valueForKeyPath:keyPath] : [object valueForKey:keyPath];
+    
+    // TODO: declutter
+    if(isKeyPath) {
+        if(otherIsKeyPath) {
+            if((! [[object valueForKeyPath:keyPath] isEqual:[otherObject valueForKeyPath:otherKeyPath]]) && ! (val == nil && [otherObject valueForKeyPath:otherKeyPath] == nil)) {
+                [otherObject setValue:val forKeyPath:otherKeyPath];
+            }
+        }
+        else {
+            if((! [[object valueForKeyPath:keyPath] isEqual:[otherObject valueForKey:otherKeyPath]]) && ! (val == nil && [otherObject valueForKey:otherKeyPath] == nil)) {
+                [otherObject setValue:val forKey:otherKeyPath];
+            }
+        }
+    }
+    else {
+        if(otherIsKeyPath) {
+            if((! [[object valueForKey:keyPath] isEqual:[otherObject valueForKeyPath:otherKeyPath]]) && ! (val == nil && [otherObject valueForKeyPath:otherKeyPath] == nil)) {
+                [otherObject setValue:val forKeyPath:otherKeyPath];
+            }
+        }
+        else {
+            if((! [[object valueForKey:keyPath] isEqual:[otherObject valueForKey:otherKeyPath]]) && ! (val == nil && [otherObject valueForKey:otherKeyPath] == nil)) {
+                [otherObject setValue:val forKey :otherKeyPath];
+            }
+        }
     }
 }
 
@@ -101,8 +144,21 @@
     if((self = [super init])) {
         self.obj1 = obj1_; self.keyPath1 = keyPath1_;
         self.obj2 = obj2_; self.keyPath2 = keyPath2_;
+        
+        self.isKeyPath1 = [self.obj1 valueForKeyPath:fromEmptyStr([[[self.keyPath1 componentsSeparatedByString:@"."] initialArray] componentsJoinedByString:@"."], self.keyPath1)] != nil;
+        self.isKeyPath2 = [self.obj2 valueForKeyPath:fromEmptyStr([[[self.keyPath2 componentsSeparatedByString:@"."] initialArray] componentsJoinedByString:@"."], self.keyPath2)] != nil;
+        
         self.transformer = transformer_;
-		[self.obj1 setValue:(self.transformer([self.obj2 valueForKeyPath:self.keyPath2])) forKeyPath:self.keyPath1];
+        if(self.isKeyPath1) {
+            if(self.isKeyPath2)
+                [self.obj1 setValue:(self.transformer([self.obj2 valueForKeyPath:self.keyPath2])) forKeyPath:self.keyPath1];
+            else
+                [self.obj1 setValue:(self.transformer([self.obj2 valueForKey:self.keyPath2])) forKeyPath:self.keyPath1];
+        }
+        if(self.isKeyPath2)
+            [self.obj1 setValue:(self.transformer([self.obj2 valueForKeyPath:self.keyPath2])) forKey:self.keyPath1];
+        else
+            [self.obj1 setValue:(self.transformer([self.obj2 valueForKey:self.keyPath2])) forKey:self.keyPath1];
         [self.obj2 addObserver:self forKeyPath:self.keyPath2 options:0 context:NULL];
     }
     return self;
@@ -115,18 +171,31 @@
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
     NSAssert(object == self.obj2 && [keyPath isEqualToString:self.keyPath2], @"Error in simple bindings mechanism.");
     
-    id val = [object valueForKeyPath:keyPath];
-    if(self.transformer)
-        val = self.transformer(val);
-    
-    if(! [[self.obj1 valueForKeyPath:self.keyPath1] isEqual:val]) {
-        [self.obj1 setValue:val forKeyPath:self.keyPath1];
+    if(self.isKeyPath1) {
+        id val = self.isKeyPath2 ? [object valueForKeyPath:keyPath] : [object valueForKey:keyPath];
+        
+        if(self.transformer)
+            val = self.transformer(val);
+        id oldVal = [self.obj1 valueForKeyPath:self.keyPath1];
+        if(! (oldVal == val || [oldVal isEqual:val])) {
+            [self.obj1 setValue:val forKeyPath:self.keyPath1];
+        }
+    }
+    else {
+        id val = self.isKeyPath2 ? [object valueForKeyPath:keyPath] : [object valueForKey:keyPath];
+        
+        if(self.transformer)
+            val = self.transformer(val);
+        id oldVal = [self.obj1 valueForKey:self.keyPath1];
+        if(! (oldVal == val || [oldVal isEqual:val])) {
+            [self.obj1 setValue:val forKey:self.keyPath1];
+        }
     }
 }
 
 - (void)dealloc {
     self.transformer = nil;
-    [super dealloc];
+    [super dealloc]; // calls deactivateBinding
 }
 
 @end
