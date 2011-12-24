@@ -73,10 +73,19 @@
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
+    // otherobject is the object which needs to be changed in response to this method call
     NSObject *otherObject = nil; NSString *otherKeyPath = nil; BOOL isKeyPath = YES; BOOL otherIsKeyPath = YES;
-    if(object == self.obj1 && [keyPath isEqualToString:self.keyPath1]) { otherObject = self.obj2; otherKeyPath = self.keyPath2; isKeyPath = self.isKeyPath1; otherIsKeyPath = self.isKeyPath2; }
-    else if(object == self.obj2 && [keyPath isEqualToString:self.keyPath2]) { otherObject = self.obj1; otherKeyPath = self.keyPath1; otherKeyPath = self.keyPath2; isKeyPath = self.isKeyPath2; otherIsKeyPath = self.isKeyPath1; }
-    else return;
+    
+    if(object == self.obj1 && [keyPath isEqualToString:self.keyPath1]) { // the notification is from observing obj1
+        otherObject = self.obj2; otherKeyPath = self.keyPath2; isKeyPath = self.isKeyPath1; otherIsKeyPath = self.isKeyPath2; 
+    }
+    else if(object == self.obj2 && [keyPath isEqualToString:self.keyPath2]) { // notification is from observing obj2
+        otherObject = self.obj1; otherKeyPath = self.keyPath1; isKeyPath = self.isKeyPath2; otherIsKeyPath = self.isKeyPath1; 
+    }
+    else {
+        NSAssert2(NO, @"Binding received notification for object (%@) it shouldn't observe with keypath %@.", object, keyPath);
+        return;
+    } 
     
     id val = isKeyPath ? [object valueForKeyPath:keyPath] : [object valueForKey:keyPath];
     
