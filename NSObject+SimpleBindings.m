@@ -10,8 +10,7 @@
 #import <objc/runtime.h>
 #import "NSArray+FPAdditions.h"
 
-@interface ObjectBinding : NSObject {
-}
+@interface ObjectBinding : NSObject
 
 @property (assign) NSObject *obj1;
 @property (copy) NSString *keyPath1;
@@ -129,16 +128,12 @@
 - (void)dealloc {
 	if(self.bindingActive) [self deactivateBinding];
     self.obj1 = nil;
-    self.keyPath1 = nil;
     self.obj2 = nil;
-    self.keyPath2 = nil;
-    [super dealloc];
 }
 
 @end
 
-@interface TransformedObjectBinding : ObjectBinding {
-}
+@interface TransformedObjectBinding : ObjectBinding
 
 @property (copy) SimpleBindingTransformer transformer;
 
@@ -202,10 +197,6 @@
     }
 }
 
-- (void)dealloc {
-    self.transformer = nil;
-    [super dealloc]; // calls deactivateBinding
-}
 
 @end
 
@@ -220,13 +211,11 @@ static char bindingsKey;
     if(bindings == nil) {
         bindings = [NSMutableSet new];
         objc_setAssociatedObject(self, &bindingsKey, bindings, OBJC_ASSOCIATION_RETAIN);
-        [bindings release];
     }
     
     ObjectBinding *b = [[ObjectBinding alloc] initWithKeyPath:binding ofObj:self keyPath:keyPath ofObj:object];
     [bindings addObject:b];
 	
-    [b release];
 }
 
 - (void)unbindObject:(NSObject *)object {
@@ -251,13 +240,11 @@ static char transformedBindingsKey;
     if(bindings == nil) {
         bindings = [NSMutableSet new];
         objc_setAssociatedObject(self, &transformedBindingsKey, bindings, OBJC_ASSOCIATION_RETAIN);
-        [bindings release];
     }
     
     TransformedObjectBinding *b = [[TransformedObjectBinding alloc] initWithKeyPath:binding ofObj:self keyPath:keyPath ofObj:object withTransformer:transformer];
     [bindings addObject:b];
     
-    [b release];
 }
 
 - (void)unbindObjectTransformed:(NSObject *)object {

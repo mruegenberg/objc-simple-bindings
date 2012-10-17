@@ -12,14 +12,6 @@
 
 @implementation NSArray (ArrayFP)
 
-- (NSArray *)mapWithSelector:(SEL)aSelector {
-	NSMutableArray *result = [[NSMutableArray alloc] init];
-	for(id val in self) {
-		[result addObject:[val performSelector:aSelector]];
-	}
-	return [result autorelease];
-}
-
 - (NSArray *)mapWithBlock:(id (^)(id obj))block {
     NSMutableArray *result = [[NSMutableArray alloc] init];
 	for(id val in self) {
@@ -27,7 +19,7 @@
         if(mappedVal)
             [result addObject:mappedVal];
 	}
-	return [result autorelease];
+	return result;
 }
 
 - (NSArray *)zipWithArray:(NSArray *)otherArray {
@@ -44,7 +36,7 @@
 		[result addObject:zipped];
 	}
 	
-	return [result autorelease];
+	return result;
 }
 
 - (id)firstObject {
