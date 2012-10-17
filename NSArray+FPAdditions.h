@@ -29,7 +29,7 @@
 
 /**
  "Zips" two arrays (for more understanding, look up the word zipper in the dictionary). 
- Each element of self is paired (as an OSTuple) with the corresponding element of otherArray. The length of the result is the length of the shorter of the two arrays.
+ Each element of self is paired (as an FPTuple) with the corresponding element of otherArray. The length of the result is the length of the shorter of the two arrays.
  [[a,b,c] zipWithArray:[1,2,3,4]] results in [(a,1),(b,2),(c,3)].
  @param otherArray Some other array with which to zip. If this is nil, it is treated as an empty array.
  @return The result of zipping the two arrays as an array of OSTuples.
