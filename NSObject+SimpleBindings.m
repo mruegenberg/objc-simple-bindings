@@ -9,6 +9,7 @@
 #import "NSObject+SimpleBindings.h"
 #import <objc/runtime.h>
 #import "NSArray+FPAdditions.h"
+#import "Util.h"
 
 @interface ObjectBinding : NSObject
 
