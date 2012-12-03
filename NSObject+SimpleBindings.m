@@ -8,8 +8,27 @@
 
 #import "NSObject+SimpleBindings.h"
 #import <objc/runtime.h>
-#import "NSArray+FPAdditions.h"
 #import "Util.h"
+
+
+@interface NSArray (BindingsHelpers)
+
+// array with all objects but the last; if the original array was empty, returns the original array
+- (NSArray *)initArray;
+
+@end
+
+@implementation NSArray (ArrayFP)
+
+- (NSArray *)initialArray {
+    NSUInteger c = [self count];
+    if(c == 0) return self;
+    else return [self subarrayWithRange:NSMakeRange(0, c - 1)];
+}
+
+@end
+
+
 
 @interface ObjectBinding : NSObject
 
@@ -42,8 +61,12 @@
         self.obj1 = obj1_; self.keyPath1 = keyPath1_;
         self.obj2 = obj2_; self.keyPath2 = keyPath2_;
         
-        self.isKeyPath1 = [self.obj1 valueForKeyPath:fromEmptyStr([[[self.keyPath1 componentsSeparatedByString:@"."] initialArray] componentsJoinedByString:@"."], self.keyPath1)] != nil;
-        self.isKeyPath2 = [self.obj2 valueForKeyPath:fromEmptyStr([[[self.keyPath2 componentsSeparatedByString:@"."] initialArray] componentsJoinedByString:@"."], self.keyPath2)] != nil;
+        NSString *key1 = [[[self.keyPath1 componentsSeparatedByString:@"."] initialArray] componentsJoinedByString:@"."];
+        if(key1 == nil || [key1 isEqualToString:@""]) key1 = self.keyPath1;
+        self.isKeyPath1 = [self.obj1 valueForKeyPath:key1] != nil;
+        NSString *key2 = [[[self.keyPath2 componentsSeparatedByString:@"."] initialArray] componentsJoinedByString:@"."];
+        if(key2 == nil || [key2 isEqualToString:@""]) key2 = self.keyPath2;
+        self.isKeyPath2 = [self.obj2 valueForKeyPath:key2] != nil;
         
         // only set key paths if that makes sense.
         // key paths only make sense if an object for the key path without the last component exists
@@ -150,8 +173,12 @@
         self.obj1 = obj1_; self.keyPath1 = keyPath1_;
         self.obj2 = obj2_; self.keyPath2 = keyPath2_;
         
-        self.isKeyPath1 = [self.obj1 valueForKeyPath:fromEmptyStr([[[self.keyPath1 componentsSeparatedByString:@"."] initialArray] componentsJoinedByString:@"."], self.keyPath1)] != nil;
-        self.isKeyPath2 = [self.obj2 valueForKeyPath:fromEmptyStr([[[self.keyPath2 componentsSeparatedByString:@"."] initialArray] componentsJoinedByString:@"."], self.keyPath2)] != nil;
+        NSString *key1 = [[[self.keyPath1 componentsSeparatedByString:@"."] initialArray] componentsJoinedByString:@"."];
+        if(key1 == nil || [key1 isEqualToString:@""]) key1 = self.keyPath1;
+        self.isKeyPath1 = [self.obj1 valueForKeyPath:key1] != nil;
+        NSString *key2 = [[[self.keyPath2 componentsSeparatedByString:@"."] initialArray] componentsJoinedByString:@"."];
+        if(key2 == nil || [key2 isEqualToString:@""]) key2 = self.keyPath2;
+        self.isKeyPath2 = [self.obj2 valueForKeyPath:key2] != nil;
         
         self.transformer = transformer_;
         if(self.isKeyPath1) {
