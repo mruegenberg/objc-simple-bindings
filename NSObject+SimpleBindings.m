@@ -97,7 +97,7 @@
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
     // otherobject is the object which needs to be changed in response to this method call
-    NSObject *otherObject = nil; NSString *otherKeyPath = nil; BOOL isKeyPath = YES; BOOL otherIsKeyPath = YES;
+    NSObject *otherObject; NSString *otherKeyPath; BOOL isKeyPath, otherIsKeyPath;
     
     if(object == self.obj1 && [keyPath isEqualToString:self.keyPath1]) { // the notification is from observing obj1
         otherObject = self.obj2; otherKeyPath = self.keyPath2; isKeyPath = self.isKeyPath1; otherIsKeyPath = self.isKeyPath2; 
