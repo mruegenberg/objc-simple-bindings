@@ -13,13 +13,13 @@ include_directories(
 set(M_SRCS NSObject+SimpleBindings.m)
 set(HEADERS NSObject+SimpleBindings.h)
 
-add_library(IAPManager ${M_SRCS} ${HEADERS})
+add_library(objc-simple-bindings ${M_SRCS} ${HEADERS})
 
 target_link_libraries(objc-simple-bindings
   "-framework CoreFoundation"
   )
 
-set_target_properties(IAPManager PROPERTIES
+set_target_properties(objc-simple-bindings PROPERTIES
    MACOSX_BUNDLE_GUI_IDENTIFIER "com.yourcompany.objc-simple-bindings"
    MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Info.plist.in
    RESOURCE "${RESOURCES}"
