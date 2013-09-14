@@ -27,3 +27,9 @@ In particular, unforeseen situations may arise when using blocks, which implicit
 License
 -------
 See LICENSE.
+
+## Contact
+
+![Travis CI build status](https://api.travis-ci.org/mruegenberg/objc-simple-bindings.png)
+
+Bug reports and pull requests are welcome! Contact me via e-mail or just by opening an issue on GitHub.
